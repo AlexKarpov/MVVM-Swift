@@ -12,11 +12,11 @@
  
  implemented under guide: https://www.swiftbysundell.com/articles/bindable-values-in-swift/
  */
-class Bindable<Value> {
+public class Bindable<Value> {
     private var observations = [(Value) -> Bool]()
     private var lastValue: Value?
 
-    init(_ value: Value? = nil) {
+    public init(_ value: Value? = nil) {
         lastValue = value
     }
 }
@@ -60,7 +60,7 @@ extension Bindable {
  So far we’ve defined all of the underlying infrastructure that we’ll need in order to actually start binding values to our UI — but to do that, we need an API to call. The reason we kept addObservation private before, is that we’ll instead expose a KeyPath-based API that we’ll be able to use to directly associate each model property with its corresponding UI property.
  Like we took a look at in “The power of key paths in Swift”, key paths can enable us to construct some really nice APIs that give us dynamic access to an object’s properties, without having to use closures. Let’s start by extending Bindable with an API that’ll let us bind a key path from a model to a key path of a view:
  */
-extension Bindable {
+public extension Bindable {
     func bind<O: AnyObject, T>(
         _ sourceKeyPath: KeyPath<Value, T>,
         to object: O,
@@ -75,7 +75,7 @@ extension Bindable {
 /**
  Since we’ll sometimes want to bind values to an optional property (such as text on UILabel), we’ll also need an additional bind overload that accepts an objectKeyPath for an optional of T:
  */
-extension Bindable {
+public extension Bindable {
     func bind<O: AnyObject, T>(
         _ sourceKeyPath: KeyPath<Value, T>,
         to object: O,
@@ -96,7 +96,7 @@ extension Bindable {
  So far, all of our model properties have been of the same type as their UI counterparts, but that’s not always the case. For example, in our earlier implementation we had to convert the user’s followersCount property to a string, in order to be able to render it using a UILabel — so how can we achieve the same thing with our new value binding approach?
  One way to do just that would be to introduce yet another bind overload that adds a transform parameter, containing a function that converts a value of T into the required result type R — and to then use that function within our observation to perform the conversion, like this:
  */
-extension Bindable {
+public extension Bindable {
     func bind<O: AnyObject, T, R>(
         _ sourceKeyPath: KeyPath<Value, T>,
         to object: O,
@@ -108,25 +108,5 @@ extension Bindable {
             let transformed = transform(value)
             object[keyPath: objectKeyPath] = transformed
         }
-    }
-}
-
-struct User {}
-
-class SyncService<Value> {
-    func sync(then callback: (Value) -> Void) {}
-}
-
-class UserModelController {
-    let user: Bindable<User>
-    private let syncService: SyncService<User>
-
-    init(user: User, syncService: SyncService<User>) {
-        self.user = Bindable(user)
-        self.syncService = syncService
-    }
-
-    func applicationDidBecomeActive() {
-        syncService.sync(then: user.update)
     }
 }
