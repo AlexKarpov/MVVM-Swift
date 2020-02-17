@@ -1,8 +1,8 @@
 //
 //  Bindable.swift
 //
+//
 //  Created by Alexander Karpov on 13.02.2020.
-//  Copyright © 2020 Alexander Karpov. All rights reserved.
 //
 
 /**
@@ -48,7 +48,7 @@ private extension Bindable {
 /**
  Finally, we need a way to update a Bindable instance whenever a new model became available. For that we’ll add an update method that updates the bindable’s lastValue and calls each observation through filter, in order to remove all observations that have become outdated:
  */
-extension Bindable {
+public extension Bindable {
     func update(with value: Value) {
         lastValue = value
         observations = observations.filter { $0(value) }
